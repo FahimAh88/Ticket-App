@@ -258,7 +258,7 @@ export default function HeroSection() {
             Find Your Next&nbsp;
             <span className="font-black" style={{ color: "#bced09" }}>Experience.</span>
           </h1>
-          <p className="text-white/50 text-base md:text-lg mt-3 font-light">
+          <p className="text-white/50 text-base md:text-lg mt-3 font-normal">
             Concerts · Festivals · Shows · Theater — all in one place.
           </p>
         </motion.div>
