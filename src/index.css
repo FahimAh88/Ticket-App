@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+/* ── Tailwind v4 design tokens ──────────────────────────────── */
+@theme {
+  /* Light mode colors */
+  --color-background: #ffffff;
+  --color-foreground: #0a0a0a;
+  --color-card: #ffffff;
+  --color-card-foreground: #0a0a0a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0a0a0a;
+  --color-primary: #0a0a0a;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #ffffff;
+  --color-secondary-foreground: #0a0a0a;
+  --color-muted: #ffffff;
+  --color-muted-foreground: #737373;
+  --color-accent: #bced09;
+  --color-accent-foreground: #0a0a0a;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-border: transparent;
+  --color-input: #f0f0f0;
+  --color-ring: #bced09;
+
+  /* Dark mode surface */
+  --color-dark-bg: #100c08;
+
+  /* Font */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 50px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+}
+
+/* ── CSS custom properties (for hsl/hex based components) ── */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 4%;
+  --card: 0 0% 98%;
+  --card-foreground: 0 0% 4%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 4%;
+  --primary: 0 0% 4%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 0 0% 94%;
+  --secondary-foreground: 0 0% 4%;
+  --muted: 0 0% 94%;
+  --muted-foreground: 0 0% 45%;
+  --accent: 69 97% 49%;
+  --accent-foreground: 0 0% 4%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  --ring: 69 97% 49%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 23 22% 5%;
+  --foreground: 0 0% 97%;
+  --card: 23 22% 7%;
+  --card-foreground: 0 0% 97%;
+  --popover: 23 22% 7%;
+  --popover-foreground: 0 0% 97%;
+  --primary: 69 97% 49%;
+  --primary-foreground: 0 0% 4%;
+  --secondary: 23 22% 12%;
+  --secondary-foreground: 0 0% 97%;
+  --muted: 23 22% 12%;
+  --muted-foreground: 0 0% 60%;
+  --accent: 69 97% 49%;
+  --accent-foreground: 0 0% 4%;
+  --destructive: 0 62% 40%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 23 22% 15%;
+  --input: 23 22% 15%;
+  --ring: 69 97% 49%;
+}
+
+/* ── Dark mode @theme overrides ── */
+.dark {
+  --color-background: #100c08;
+  --color-foreground: #f5f5f5;
+  --color-card: #100c08;
+  --color-card-foreground: #f5f5f5;
+  --color-popover: #100c08;
+  --color-popover-foreground: #f5f5f5;
+  --color-primary: #bced09;
+  --color-primary-foreground: #100c08;
+  --color-secondary: #100c08;
+  --color-secondary-foreground: #f5f5f5;
+  --color-muted: #100c08;
+  --color-muted-foreground: #a0a0a0;
+  --color-accent: #bced09;
+  --color-accent-foreground: #100c08;
+  --color-border: transparent;
+  --color-input: #1a1410;
+  --color-ring: #bced09;
+}
+
+/* ── Base styles ──────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  border-color: hsl(var(--border));
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ── Accent utilities ── */
+.accent-glow {
+  box-shadow: 0 0 30px rgba(188, 237, 9, 0.25);
+}
+
+.accent-text {
+  color: #bced09;
+}
+
+.bg-dark-hero {
+  background-color: #100c08;
+}
+
+/* ── Horizontal scroll hide scrollbar ── */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Glass effect ── */
+.glass {
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background: rgba(16, 12, 8, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-light {
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
