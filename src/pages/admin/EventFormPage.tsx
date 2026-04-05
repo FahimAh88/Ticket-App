@@ -64,6 +64,7 @@ interface FormState {
   location: string;
   country: string;
   imageUrl: string;
+  galleryUrls: string[];
   isSoldOut: boolean;
 }
 
@@ -84,6 +85,7 @@ const emptyForm: FormState = {
   location: "",
   country: "",
   imageUrl: "",
+  galleryUrls: [],
   isSoldOut: false,
 };
 
@@ -199,6 +201,7 @@ export default function EventFormPage() {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [tiers, setTiers] = useState<TierDraft[]>([emptyTier()]);
   const [imgPreviewError, setImgPreviewError] = useState(false);
+  const [galleryErrors, setGalleryErrors] = useState<Record<number, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
 
   // Load data if editing or duplicating
@@ -217,6 +220,7 @@ export default function EventFormPage() {
           location: existing.location,
           country: existing.country,
           imageUrl: existing.imageUrl,
+          galleryUrls: existing.galleryUrls || [],
           isSoldOut: !!existing.isSoldOut,
         });
         setTiers(existing.ticketTiers?.map(t => ({
@@ -229,7 +233,7 @@ export default function EventFormPage() {
     }
   }, [id, duplicateId, events]);
 
-  const updateForm = (key: keyof FormState, val: string) => setForm(p => ({ ...p, [key]: val }));
+  const updateForm = (key: keyof FormState, val: any) => setForm(p => ({ ...p, [key]: val }));
   const addTier = () => setTiers(p => [...p, emptyTier()]);
   const removeTier = (id: string) => setTiers(p => p.filter(t => t.id !== id));
   const updateTier = (id: string, key: keyof TierDraft, val: string) => setTiers(p => p.map(t => t.id === id ? { ...t, [key]: val } : t));
@@ -261,6 +265,7 @@ export default function EventFormPage() {
         location: form.location,
         country: form.country,
         imageUrl: form.imageUrl || "https://images.unsplash.com/photo-1540039155733-d73070440ef4?q=80&w=800&auto=format&fit=crop",
+        galleryUrls: form.galleryUrls.filter(url => url.trim() !== ""),
         tags: [form.category, "Admin"],
         artists: [],
         price: basePrice,
@@ -432,6 +437,71 @@ export default function EventFormPage() {
                  <div className="absolute top-4 left-4">
                     <Badge className="bg-black/80 backdrop-blur border-none font-bold">PREVIEW</Badge>
                  </div>
+              </div>
+
+              <div className="pt-6 border-t border-border/30 mt-8">
+                <Field label="Gallery Images (Optional)">
+                  <div className="space-y-4 mt-2">
+                    {form.galleryUrls.map((url, idx) => (
+                      <motion.div 
+                        key={idx} 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex gap-3 items-center bg-secondary/30 p-2 rounded-2xl border border-border/40"
+                      >
+                        {/* Gallery Thumbnail Preview */}
+                        <div className="w-16 h-16 rounded-xl overflow-hidden shadow-sm shrink-0 bg-secondary flex items-center justify-center relative">
+                          {url && !galleryErrors[idx] ? (
+                            <img 
+                              key={url}
+                              src={url} 
+                              alt="Gallery Preview" 
+                              className="w-full h-full object-cover" 
+                              onError={() => setGalleryErrors(p => ({...p, [idx]: true}))} 
+                            />
+                          ) : (
+                            <ImageIcon className="w-5 h-5 opacity-20 text-muted-foreground" />
+                          )}
+                        </div>
+
+                        <div className="relative flex-1">
+                          <input 
+                            type="url" 
+                            value={url} 
+                            onChange={e => {
+                               const newUrls = [...form.galleryUrls];
+                               newUrls[idx] = e.target.value;
+                               updateForm("galleryUrls", newUrls);
+                               setGalleryErrors(p => ({ ...p, [idx]: false }));
+                            }} 
+                            placeholder="Additional image URL..." 
+                            className={cn(inputBase, "bg-background")} 
+                          />
+                        </div>
+                        
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          className="h-12 w-12 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0 mr-2"
+                          onClick={() => {
+                            const newUrls = form.galleryUrls.filter((_, i) => i !== idx);
+                            updateForm("galleryUrls", newUrls);
+                          }}
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </Button>
+                      </motion.div>
+                    ))}
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="w-full h-12 rounded-2xl border-dashed hover:bg-accent/5 hover:border-accent/50 text-sm font-bold" 
+                      onClick={() => updateForm("galleryUrls", [...form.galleryUrls, ""])}
+                    >
+                      <Plus className="w-4 h-4 mr-2" /> Add Gallery Image
+                    </Button>
+                  </div>
+                </Field>
               </div>
           </Section>
 

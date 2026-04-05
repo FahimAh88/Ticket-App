@@ -41,6 +41,7 @@ export interface AppEvent {
   category?: string;
   ticketTiers?: TicketTier[];
   isSoldOut?: boolean;
+  galleryUrls?: string[];
 }
 
 export const mockArtists: Artist[] = [
