@@ -76,9 +76,22 @@ function CustomDatePicker({ date, setDate }: { date: string; setDate: (d: string
 /* ── Hero Search Bar ───────────────────────────────────── */
 function HeroSearchBar() {
   const navigate = useNavigate();
+  const { events } = useAppContext();
   const [query, setQuery] = useState("");
   const [location, setLocation] = useState("");
   const [date, setDate] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -86,7 +99,17 @@ function HeroSearchBar() {
     if (location) params.set("location", location);
     if (date) params.set("date", date);
     navigate(`/events?${params.toString()}`);
+    setShowDropdown(false);
   };
+
+  const filteredEvents = events.filter((e) => {
+    if (!query) return false;
+    const q = query.toLowerCase();
+    const titleMatch = e.title.toLowerCase().includes(q);
+    const venueMatch = e.location.toLowerCase().includes(q);
+    const artistMatch = e.artists?.some((a) => a.name.toLowerCase().includes(q));
+    return titleMatch || venueMatch || artistMatch;
+  }).slice(0, 4);
 
   const Divider = () => <div className="hidden md:block h-6 w-[1.5px] bg-gray-100/80 self-center opacity-50" />;
 
@@ -95,12 +118,12 @@ function HeroSearchBar() {
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.45, duration: 0.55, ease: "easeOut" }}
-      className="w-full max-w-4xl mx-auto mt-10 px-4"
+      className="w-full max-w-4xl mx-auto mt-10 px-4 relative z-50"
     >
-      <div className="rounded-[50px] flex flex-col md:flex-row overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] bg-white">
+      <div className="rounded-[50px] flex flex-col md:flex-row shadow-[0_20px_50px_rgba(0,0,0,0.15)] bg-white relative">
         
         {/* Location */}
-        <div className="flex items-center gap-3 flex-1 px-8 py-5 transition-colors hover:bg-gray-50/50">
+        <div className="flex items-center gap-3 flex-1 px-8 py-5 transition-colors hover:bg-gray-50/50 rounded-t-[50px] md:rounded-none md:rounded-l-[50px]">
           <MapPin className="h-4 w-4 shrink-0 text-gray-400" />
           <input
             type="text"
@@ -120,23 +143,70 @@ function HeroSearchBar() {
         <Divider />
 
         {/* Search */}
-        <div className="flex items-center gap-3 flex-[1.2] px-8 py-5 transition-colors hover:bg-gray-50/50">
+        <div ref={searchRef} className="flex items-center gap-3 flex-[1.2] px-8 py-5 transition-colors hover:bg-gray-50/50 relative">
           <Search className="h-4 w-4 shrink-0 text-gray-400" />
           <input
             type="text"
             placeholder="Search events, venues..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setShowDropdown(true);
+            }}
+            onFocus={() => {
+              if (query) setShowDropdown(true);
+            }}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             className="bg-transparent w-full text-gray-900 placeholder:text-gray-400 text-sm focus:outline-none font-medium"
           />
+
+          {/* Live Search Dropdown */}
+          <AnimatePresence>
+            {showDropdown && query && (
+              <motion.div
+                initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 12, scale: 0.95 }}
+                className="absolute top-full left-0 right-0 md:min-w-[360px] mt-4 bg-white rounded-3xl shadow-2xl border border-gray-100 p-4 z-[100] max-h-[400px] overflow-y-auto"
+              >
+                {filteredEvents.length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    <h4 className="text-xs font-semibold uppercase tracking-widest text-[#bced09] px-3 pb-2 border-b border-gray-50">Live Results</h4>
+                    {filteredEvents.map((event) => (
+                      <div 
+                        key={event.id}
+                        onClick={() => {
+                          navigate(`/events/${event.id}`);
+                          setShowDropdown(false);
+                        }}
+                        className="flex items-center gap-4 p-3 rounded-2xl hover:bg-gray-50 cursor-pointer transition-colors"
+                      >
+                         <img src={event.imageUrl} alt={event.title} className="w-14 h-14 rounded-xl object-cover shadow-sm bg-gray-100 shrink-0" />
+                         <div className="min-w-0 flex-1">
+                            <p className="text-sm font-bold text-gray-900 truncate">{event.title}</p>
+                            <p className="text-xs text-gray-500 mt-1 truncate">
+                              {event.artists?.[0]?.name || event.organizerName} • {event.location}
+                            </p>
+                         </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-6 text-center">
+                    <Search className="w-6 h-6 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500 font-medium">No results found for "{query}"</p>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Search button */}
-        <div className="p-2 flex shrink-0">
+        <div className="p-2 flex shrink-0 rounded-b-[50px] md:rounded-none md:rounded-r-[50px]">
           <button
             onClick={handleSearch}
-            className="px-10 rounded-full font-medium text-sm tracking-widest uppercase transition-all hover:brightness-110 active:scale-95 flex items-center justify-center min-h-[56px] shadow-lg shadow-accent/20"
+            className="px-10 rounded-full font-medium text-sm tracking-widest uppercase transition-all hover:brightness-110 active:scale-95 flex items-center justify-center min-h-[56px] shadow-lg shadow-accent/20 w-full md:w-auto"
             style={{ backgroundColor: "#bced09", color: "#100c08" }}
           >
             Search
